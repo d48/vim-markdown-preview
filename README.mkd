@@ -1,5 +1,12 @@
 ## vim-markdown-preview
 
+This is a fork from: nelstrom/vim-markdown-preview 
+
+I modified it so it actually has the github readme markdown styling. 
+
+![screenshot](http://f.cl.ly/items/303N282D1g343J1G2D31/Screen%20Shot%202014-07-19%20at%209.11.55%20AM.png)
+
+
 _vim-markdown-preview_ adds the option to preview markdown documents in the 
 browser from the vim editor.  
 The web page it opens is loosely styled on how GitHub would render README.mkd.
