@@ -1,4 +1,4 @@
-function! PreviewMKD()
+function! PreviewCD()
   ruby << RUBY
 
    # get file name and either preview markdown or js with github styling
@@ -8,16 +8,29 @@ function! PreviewMKD()
     end
 
     require('kramdown/kramdown')
+	require('cgi')
 
     text = Array.new(VIM::Buffer.current.count) do |i|
       VIM::Buffer.current[i + 1]
     end.join("\n")
 
+	tmpline = "\n" + text
+
     VIM::Buffer.current.name.nil? ? (name = 'No Name.md') : (name = Vim::Buffer.current.name)
 
+    if File.extname(name) =~ /\.(html)/
+		tmpline = CGI::escapeHTML(tmpline)
+	end
+
     preview_path = VIM.evaluate('&runtimepath').split(',').select{|path| path =~ /vim-markdown-preview/}.first
-    cssfile = File.open("#{preview_path}/plugin/markdown-preview.css")
+    cssfile = File.open("#{preview_path}/plugin/styles/github.css")
     style = cssfile.read
+
+	jsFile = File.open("#{preview_path}/plugin/js/highlight.pack.js")
+	js = jsFile.read
+
+	mainJs = File.open("#{preview_path}/plugin/js/main.js")
+	mjs = mainJs.read
 
     layout = <<-LAYOUT
   <!DOCTYPE html
@@ -38,25 +51,30 @@ function! PreviewMKD()
 				</h1>
 
 				<div id="readme">
+					<div id="numbers"></div>
 					<div id="content" class="markdown-body">
-						#{Kramdown::Document.new(text).to_html}
+						<pre class="javascript">
+							#{tmpline}
+						</pre>
 					</div>
 				</div>
 		  </div>
 
+		  <script type="text/javascript" charset="utf-8">
+			  #{js}
+		  </script>
+		  <script type="text/javascript">
+			  #{mjs}
+		  </script>
       </body>
     </html>
     LAYOUT
 
 
-    unless File.extname(name) =~ /\.(md|mkd|markdown)/
-      VIM.message('This file extension is not supported for Markdown previews')
-    else
-      file = File.join('/tmp', File.basename(name) + '.html')
-      File.open('%s' % [ file ], 'w') { |f| f.write(layout) }
-      Vim.command("silent !open '%s'" % [ file ])
-    end
+    file = File.join('/tmp', File.basename(name) + '.html')
+    File.open('%s' % [ file ], 'w') { |f| f.write(layout) }
+    Vim.command("silent !open '%s'" % [ file ])
 RUBY
 endfunction
 
-:command! Mm :call PreviewMKD()
+:command! Cc :call PreviewCD()
